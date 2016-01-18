@@ -29,6 +29,8 @@
         }
     },
     "suggest": {
+        "elixir/elixir-http": "*",
+        "elixir/elixir-session": "*",
         "ircmaxell/password-compat": "if php version < 5.5"
     }
 }
