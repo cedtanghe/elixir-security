@@ -1,0 +1,34 @@
+{
+    "name": "elixir/elixir-security",
+    "description": "Component security",
+    "version": "1.0.0",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "elixir",
+        "security",
+        "firewall",
+        "rbac"
+    ],
+    "homepage": "https://github.com/cedtanghe/elixir-security",
+    "repositories": [
+    ],
+    "require": {
+        "php": ">=5.4"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Elixir\\Security\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Elixir\\Test\\Security\\": "tests/"
+        }
+    },
+    "suggest": {
+        "ircmaxell/password-compat": "if php version < 5.5"
+    }
+}
