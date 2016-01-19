@@ -39,7 +39,7 @@ class Hash
      * @param integer|array $config
      * @return string
      */
-    public static function password($password , $config)
+    public static function password($password , $config = [])
     {
         if (is_array($config))
         {
