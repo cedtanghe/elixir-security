@@ -92,7 +92,7 @@ class Crypt
     }
 
     /**
-     * @param string $pStr
+     * @param string $str
      * @return string
      */
     public function decrypt($str)
