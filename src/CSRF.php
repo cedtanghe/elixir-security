@@ -111,6 +111,8 @@ class CSRF
             
             if (!isset($params[$name]))
             {
+                $this->invalidate();
+                
                 $this->storage->remove([self::TOKEN_KEY, $name]);
                 return false;
             }
@@ -130,16 +132,13 @@ class CSRF
             $error = true;
         }
 
-        if (!$error)
+        if (!$error && null !== $options['referer'])
         {
-            if (null !== $options['referer']) 
-            {
-                $params = $this->request->getServerParams();
+            $params = $this->request->getServerParams();
 
-                if (!isset($params['HTTP_REFERER']) || $params['HTTP_REFERER'] !== $options['referer'])
-                {
-                    $error = true;
-                }
+            if (!isset($params['HTTP_REFERER']) || $params['HTTP_REFERER'] !== $options['referer'])
+            {
+                $error = true;
             }
         }
 
