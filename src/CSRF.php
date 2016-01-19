@@ -112,8 +112,6 @@ class CSRF
             if (!isset($params[$name]))
             {
                 $this->invalidate();
-                
-                $this->storage->remove([self::TOKEN_KEY, $name]);
                 return false;
             }
             else
