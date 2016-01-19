@@ -67,7 +67,7 @@ class CSRF
     {
         $config += [
             'time' => self::DEFAULT_TIME,
-            'consumable' => true
+            'regenerate' => false
         ];
         
         if ($config['time'] instanceof \DateTime) 
@@ -83,7 +83,11 @@ class CSRF
         
         $this->storage->set(
             [self::TOKEN_KEY, $name . $token],
-            ['expire' => time() . $config['time'], 'consumable' => $config['consumable']]
+            [
+                'expire' => time() + $config['time'], 
+                'time' => $config['time'], 
+                'regenerate' => $config['regenerate']
+            ]
         );
 
         return $token;
@@ -101,15 +105,14 @@ class CSRF
             'token' => null
         ];
         
-        $error = false;
-        
         if (null === $options['token'])
         {
             $params = $this->request->getParsedBody();
             
             if (!isset($params[$name]))
             {
-                $error = true;
+                $this->storage->remove([self::TOKEN_KEY, $name]);
+                return false;
             }
             else
             {
@@ -117,44 +120,39 @@ class CSRF
             }
         }
         
-        if (!$error) 
+        $error = false;
+        $name .= $options['token'];
+        $config = $this->storage->get([self::TOKEN_KEY, $name], []);
+        $time = isset($config['expire']) ? $config['expire'] : 0;
+
+        if (time() > $time)
         {
-            $name .= $options['token'];
-            $config = $this->storage->get([self::TOKEN_KEY, $name], []);
-            $time = isset($config['expire']) ? $config['expire'] : null;
+            $error = true;
+        }
 
-            if (null === $time) 
+        if (!$error)
+        {
+            if (null !== $options['referer']) 
             {
-                $error = true;
-            }
+                $params = $this->request->getServerParams();
 
-            if (!$error) 
-            {
-                $consumable = array_key_exists(consumable, $config) ? $config['consumable'] : true;
-                
-                if ($consumable)
-                {
-                    $this->storage->remove([self::TOKEN_KEY, $name]);
-                }
-                
-                if (time() > $time)
+                if (!isset($params['HTTP_REFERER']) || $params['HTTP_REFERER'] !== $options['referer'])
                 {
                     $error = true;
                 }
-
-                if (!$error)
-                {
-                    if (null !== $options['referer']) 
-                    {
-                        $params = $this->request->getServerParams();
-                        
-                        if (!isset($params['HTTP_REFERER']) || $params['HTTP_REFERER'] !== $options['referer'])
-                        {
-                            $error = true;
-                        }
-                    }
-                }
             }
+        }
+
+        $regenerate = array_key_exists('regenerate', $config) ? $config['regenerate'] : false;
+
+        if ($error || !$regenerate)
+        {
+            $this->storage->remove([self::TOKEN_KEY, $name]);
+        }
+        else if ($regenerate)
+        {
+            $config['expire'] = time() + $config['time'];
+            $this->storage->set([self::TOKEN_KEY, $name], $config);
         }
         
         $this->invalidate();
