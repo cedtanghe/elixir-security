@@ -105,7 +105,7 @@ class Crypt
                 $this->secret, 
                 substr($decode, $this->ivSize), 
                 $this->mode, 
-                substr($decode, 0, $this->_ivSize)
+                substr($decode, 0, $this->ivSize)
             ), 
             "\0"
         );
