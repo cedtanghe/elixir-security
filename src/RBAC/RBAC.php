@@ -91,7 +91,7 @@ class RBAC implements RBACInterface
 
         while ($i--)
         {
-            $r = $this->roles[i];
+            $r = $this->roles[$i];
 
             if ($r->getName() == $role)
             {
