@@ -39,7 +39,7 @@ class Hash
      * @param integer|array $config
      * @return string
      */
-    public static function password($password, $config = [])
+    public static function password($password, $config = null)
     {
         if (is_array($config))
         {
@@ -48,9 +48,14 @@ class Hash
             unset($config['algo']);
             $options = $config;
         }
-        else
+        else if (!empty($config))
         {
             $algo = $config;
+            $options = [];
+        }
+        else
+        {
+            $algo = PASSWORD_DEFAULT;
             $options = [];
         }
         
@@ -72,7 +77,7 @@ class Hash
      * @param integer|array $config
      * @return boolean
      */
-    public static function needsRehash($hash, $config = []) 
+    public static function needsRehash($hash, $config = null) 
     {
         if (is_array($config))
         {
@@ -81,12 +86,27 @@ class Hash
             unset($config['algo']);
             $options = $config;
         }
-        else
+        else if (!empty($config))
         {
             $algo = $config;
             $options = [];
         }
+        else
+        {
+            $infos = static::hashInfo($hash);
+            $algo = $infos['algo'];
+            $options = $infos['options'];
+        }
         
         return password_needs_rehash($hash, $algo, $options);
+    }
+    
+    /**
+     * @param string $hash
+     * @return array
+     */
+    public static function hashInfo($hash) 
+    {
+        return password_get_info($hash);
     }
 }
