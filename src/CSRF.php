@@ -70,13 +70,19 @@ class CSRF
             'regenerate' => false
         ];
         
+        $time = time();
+        
         if ($config['time'] instanceof \DateTime) 
         {
-            $config['time'] = $pTime->format('U');
+            $config['time'] = $config['time']->format('U') - $time;
         } 
+        else if (version_compare(phpversion(), '5.5', '>=') && $config['time'] instanceof \DateInterval)
+        {
+            $config['time'] = $config['time']->format('U');
+        }
         else if (!is_numeric($config['time'])) 
         {
-            $config['time'] = strtotime($pTime);
+            $config['time'] = strtotime($config['time']);
         }
 
         $token = uniqid(rand(), true);
@@ -84,7 +90,7 @@ class CSRF
         $this->storage->set(
             [self::TOKEN_KEY, $name . $token],
             [
-                'expire' => time() + $config['time'], 
+                'expire' => $time + $config['time'], 
                 'time' => $config['time'], 
                 'regenerate' => $config['regenerate']
             ]
