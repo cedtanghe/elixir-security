@@ -186,4 +186,23 @@ class Role
             }
         }
     }
+    
+    /**
+     * @ignore
+     */
+    public function __debugInfo()
+    {
+        $children = [];
+        
+        foreach ($this->children as $child)
+        {
+            $children[] = $child->getName();
+        }
+        
+        return [
+            'name' => $this->name,
+            'permissions' => $this->permissions,
+            'children' => $children
+        ];
+    }
 }
