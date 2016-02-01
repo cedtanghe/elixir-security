@@ -12,7 +12,6 @@ use Elixir\Security\Auth\Storage\StorageInterface;
  */
 class AuthManager extends Dispatcher 
 {
-
     /**
      * @var string
      */
