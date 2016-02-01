@@ -3,9 +3,9 @@
 namespace Elixir\Security;
 
 use Elixir\HTTP\ServerRequestFactory;
-use Elixir\HTTP\ServerRequestInterface;
 use Elixir\Session\Session;
-use Elixir\Session\SessionInterface;
+use Elixir\STDLib\ArrayUtils;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -28,15 +28,15 @@ class CSRF
     protected $request;
     
     /**
-     * @var SessionInterface 
+     * @var array|\ArrayAccess 
      */
     protected $storage;
     
     /**
      * @param ServerRequestInterface $request
-     * @param SessionInterface $storage
+     * @param array|\ArrayAccess $storage
      */
-    public function __construct(ServerRequestInterface $request = null, SessionInterface $storage = null)
+    public function __construct(ServerRequestInterface $request = null, $storage = null)
     {
         $this->request = $request ?: ServerRequestFactory::createFromGlobals();
         $this->storage = $storage ?: Session::instance();
@@ -51,7 +51,7 @@ class CSRF
     }
     
     /**
-     * @return SessionInterface
+     * @return array|\ArrayAccess
      */
     public function getStorage()
     {
@@ -87,13 +87,14 @@ class CSRF
 
         $token = uniqid(rand(), true);
         
-        $this->storage->set(
-            [self::TOKEN_KEY, $name . $token],
+        ArrayUtils::set(
+            [self::TOKEN_KEY, $name . $token], 
             [
                 'expire' => $time + $config['time'], 
                 'time' => $config['time'], 
                 'regenerate' => $config['regenerate']
-            ]
+            ], 
+            $this->storage
         );
 
         return $token;
@@ -128,7 +129,7 @@ class CSRF
         
         $error = false;
         $name .= $options['token'];
-        $config = $this->storage->get([self::TOKEN_KEY, $name], []);
+        $config = ArrayUtils::get([self::TOKEN_KEY, $name], $this->storage, []);
         $time = isset($config['expire']) ? $config['expire'] : 0;
 
         if (time() > $time)
@@ -150,12 +151,12 @@ class CSRF
 
         if ($error || !$regenerate)
         {
-            $this->storage->remove([self::TOKEN_KEY, $name]);
+            ArrayUtils::remove([self::TOKEN_KEY, $name], $this->storage);
         }
         else if ($regenerate)
         {
             $config['expire'] = time() + $config['time'];
-            $this->storage->set([self::TOKEN_KEY, $name], $config);
+            ArrayUtils::set([self::TOKEN_KEY, $name], $config, $this->storage);
         }
         
         $this->invalidate();
@@ -167,7 +168,7 @@ class CSRF
      */
     public function invalidate() 
     {
-        $tokens = $this->storage->get(self::TOKEN_KEY, []);
+        $tokens = ArrayUtils::get(self::TOKEN_KEY, $this->storage, []);
         $time = time();
 
         foreach ($tokens as $key => $config)
@@ -180,6 +181,6 @@ class CSRF
             }
         }
 
-        $this->storage->set(self::TOKEN_KEY, $tokens);
+        ArrayUtils::set(self::TOKEN_KEY, $tokens, $this->storage);
     }
 }
