@@ -32,6 +32,11 @@ interface StorageInterface
      * @param string $domain
      */
     public function clearIdentity($domain);
+    
+    /**
+     * @return array
+     */
+    public function allIdentities();
 
     /**
      * @return void

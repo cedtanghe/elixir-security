@@ -211,7 +211,7 @@ class RBAC implements RBACInterface
 
         if (null !== $assert) 
         {
-            return true === call_user_func_array($assert, [$hasRole, $hasPermission, $this]);
+            return true === call_user_func_array($assert, [['has_role' => $hasRole, 'has_permission' => $hasPermission, 'RBAC' => $this]]);
         }
         
         return $hasRole && $hasPermission;

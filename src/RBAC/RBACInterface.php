@@ -22,7 +22,7 @@ interface RBACInterface
 
     /**
      * @param string|integer $role
-     * @param string|integer $permission
+     * @param string|integer|array $permission
      * @param callable $assert
      * @return boolean
      */

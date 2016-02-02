@@ -83,7 +83,22 @@ class Session implements StorageInterface
             $this->unObserve($identity);
         }
     }
-
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function allIdentities()
+    {
+        $identities = ArrayUtils::get(self::STORAGE_KEY, $this->session, []);
+        
+        foreach ($identities as $identity)
+        {
+            $this->observe($identity);
+        }
+        
+        return $identities;
+    }
+    
     /**
      * {@inheritdoc}
      */

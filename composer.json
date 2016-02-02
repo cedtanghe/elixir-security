@@ -22,6 +22,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/cedtanghe/elixir-stdlib"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/cedtanghe/elixir-config"
         }
     ],
     "require": {
@@ -44,6 +48,7 @@
     "suggest": {
         "elixir/elixir-http": "*",
         "elixir/elixir-session": "*",
+        "elixir/elixir-config": "*",
         "ircmaxell/password-compat": "php version < 5.5"
     }
 }

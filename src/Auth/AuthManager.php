@@ -56,6 +56,14 @@ class AuthManager extends Dispatcher
     }
     
     /**
+     * @return boolean
+     */
+    public function isEmpty()
+    {
+        return count($this->storage->allIdentities()) === 0;
+    }
+
+    /**
      * @ignore
      */
     public function __call($name, $arguments)
