@@ -97,16 +97,15 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     
     /**
      * @param AccessControlInterface|array $options
-     * @param boolean $recursive
      */
-    public function mergeOptions($options, $recursive = false)
+    public function mergeOptions($options)
     {
         if ($options instanceof self) 
         {
             $options = $options->allOptions();
         }
 
-        $this->options = $recursive ? array_merge_recursive($this->options, $options) : array_merge($this->options, $options);
+        $this->options = array_merge($this->options, $options);
     }
 
     /**
