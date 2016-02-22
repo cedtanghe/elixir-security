@@ -7,7 +7,7 @@ use Elixir\Dispatcher\DispatcherTrait;
 use Elixir\Security\Auth\AuthManager;
 use Elixir\Security\Firewall\AccessControlInterface;
 use Elixir\Security\Firewall\FirewallInterface;
-use Elixir\Security\Firewall\Parser;
+use Elixir\Security\Firewall\LoadParser;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -61,7 +61,7 @@ abstract class FirewallAbstract implements FirewallInterface
     {
         $data = $key ? $config->get($key, []) : $config->all();
         
-        foreach (Parser::parse($data, get_class($this)) as $config)
+        foreach (LoadParser::parse($data, get_class($this)) as $config)
         {
             $this->addAccessControl($config['access_control'], $config['priority']);
         }

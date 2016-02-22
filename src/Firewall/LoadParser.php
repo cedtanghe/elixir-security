@@ -5,7 +5,7 @@ namespace Elixir\Security\Firewall;
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-class Parser 
+class LoadParser 
 {
     /**
      * @param array $data
