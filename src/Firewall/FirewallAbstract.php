@@ -4,6 +4,7 @@ namespace Elixir\Security\Firewall;
 
 use Elixir\Config\Cache\CacheableInterface;
 use Elixir\Config\Loader\LoaderFactory;
+use Elixir\Config\Loader\LoaderFactoryAwareTrait;
 use Elixir\Config\Writer\WriterInterface;
 use Elixir\Dispatcher\DispatcherTrait;
 use Elixir\Security\Auth\AuthManager;
@@ -16,6 +17,7 @@ use Elixir\Security\Firewall\LoadParser;
  */
 abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
 {
+    use LoaderFactoryAwareTrait;
     use DispatcherTrait;
     
     /**
@@ -135,7 +137,13 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
             }
             else
             {
-                $loader = LoaderFactory::create($config);
+                if (null === $this->loaderFactory)
+                {
+                    $this->loaderFactory = new LoaderFactory();
+                    LoaderFactory::addDefaultLoaders($this->loaderFactory);
+                }
+                
+                $loader = $this->loaderFactory->create($config);
                 $data = $loader->load($config);
             }
             
