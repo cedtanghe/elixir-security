@@ -2,7 +2,9 @@
 
 namespace Elixir\Security\Firewall;
 
-use Elixir\Config\ConfigInterface;
+use Elixir\Config\Cache\CacheableInterface;
+use Elixir\Config\Loader\LoaderFactory;
+use Elixir\Config\Writer\WriterInterface;
 use Elixir\Dispatcher\DispatcherTrait;
 use Elixir\Security\Auth\AuthManager;
 use Elixir\Security\Firewall\AccessControlInterface;
@@ -12,8 +14,7 @@ use Elixir\Security\Firewall\LoadParser;
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-
-abstract class FirewallAbstract implements FirewallInterface
+abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
 {
     use DispatcherTrait;
     
@@ -26,6 +27,11 @@ abstract class FirewallAbstract implements FirewallInterface
      * @var boolean
      */
     protected $sorted = false;
+    
+    /**
+     * @var CacheableInterface 
+     */
+    protected $cache;
     
     /**
      * @var AuthManager
@@ -54,46 +60,100 @@ abstract class FirewallAbstract implements FirewallInterface
     }
     
     /**
-     * @param ConfigInterface $config
-     * @param string $key
+     * @param CacheableInterface $value
      */
-    public function fromConfig(ConfigInterface $config, $key = null)
+    public function setCacheStrategy(CacheableInterface $value)
     {
-        $data = $key ? $config->get($key, []) : $config->all();
-        
-        foreach (LoadParser::parse($data, get_class($this)) as $config)
+        $this->cache = $value;
+    }
+    
+    /**
+     * @return CacheableInterface
+     */
+    public function getCacheStrategy()
+    {
+        return $this->cache;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function loadCache()
+    {
+        if (null === $this->cache)
         {
-            $this->addAccessControl($config['access_control'], $config['priority']);
+            return false;
+        }
+        
+        $data = $this->cache->loadCache();
+        
+        if ($data)
+        {
+            $data = LoadParser::parse($data, get_class($this));
+            
+            foreach ($data as $config)
+            {
+                $this->addAccessControl($config['access_control'], $config['priority']);
+            }
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function cacheLoaded()
+    {
+        if (null === $this->cache)
+        {
+            return false;
+        }
+        
+        return $this->cache->cacheLoaded();
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function load($config, array $options = [])
+    {
+        if ($this->cacheLoaded())
+        {
+            return;
+        }
+        
+        if ($config instanceof self)
+        {
+            $this->merge($config);
+        } 
+        else 
+        {
+            if (is_callable($config))
+            {
+                $data = call_user_func_array($config, [$this]);
+            }
+            else
+            {
+                $loader = LoaderFactory::create($config);
+                $data = $loader->load($config);
+            }
+            
+            $data = LoadParser::parse($data, get_class($this));
+            
+            foreach ($data as $config)
+            {
+                $this->addAccessControl($config['access_control'], $config['priority']);
+            }
         }
     }
     
     /**
-     * @param ConfigInterface $config
-     * @param string $key
-     * @return ConfigInterface
+     * {@inheritdoc}
      */
-    public function toConfig(ConfigInterface $config, $key = null)
+    public function export(WriterInterface $writer, $file)
     {
-        $data = [];
-
-        foreach ($this->allAccessControls(true) as $config)
-        {
-            $data[$config['access_control']->getPattern()] = [
-                'options' => $config['access_control']->getOptions(),
-                'priority' => $config['priority']
-            ];
-        }
-        
-        if (null !== $key)
-        {
-            $config->set($key, $data);
-        }
-        else
-        {
-            $config->replace($data);
-        }
-        
-        return $config;
+        return $writer->export($this->getExportableData(), $file);
     }
     
     /**
@@ -222,14 +282,78 @@ abstract class FirewallAbstract implements FirewallInterface
     }
     
     /**
-     * @param AccessControlInterface|array $accessControls
+     * @return boolean
      */
-    public function merge($accessControls)
+    public function isFreshCache()
     {
-        if ($accessControls instanceof self) 
+        if (null === $this->cache)
         {
-            $accessControls = $accessControls->allAccessControls(true);
+            return false;
         }
+        
+        return $this->cache->isFreshCache();
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function exportToCache(array $data = null)
+    {
+        if (null === $this->cache)
+        {
+            return false;
+        }
+        
+        if ($data)
+        {
+            $data = LoadParser::parse($data, get_class($this));
+            
+            foreach ($data as $config)
+            {
+                $this->addAccessControl($config['access_control'], $config['priority']);
+            }
+        }
+        
+        return $this->cache->exportToCache($this->getExportableData());
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function invalidateCache()
+    {
+        if (null === $this->cache)
+        {
+            return false;
+        }
+        
+        return $this->cache->invalidateCache();
+    }
+    
+    /**
+     * @return array
+     */
+    protected function getExportableData()
+    {
+        $data = [];
+
+        foreach ($this->allAccessControls(true) as $config)
+        {
+            $data[$config['access_control']->getPattern()] = [
+                'options' => $config['access_control']->getOptions(),
+                'priority' => $config['priority']
+            ];
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * @param FirewallInterface $firewall
+     */
+    public function merge(FirewallInterface $firewall)
+    {
+        $accessControls = $firewall->allAccessControls(true);
 
         if (count($accessControls) > 0) 
         {
