@@ -140,7 +140,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
                 if (null === $this->loaderFactory)
                 {
                     $this->loaderFactory = new LoaderFactory();
-                    LoaderFactory::addDefaultLoaders($this->loaderFactory);
+                    LoaderFactory::addLoaderProvider($this->loaderFactory);
                 }
                 
                 $loader = $this->loaderFactory->create($config);
