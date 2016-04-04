@@ -120,7 +120,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
      */
     public function load($config, array $options = [])
     {
-        if ($this->cacheLoaded())
+        if ($this->cacheLoaded() && $this->isFreshCache())
         {
             return;
         }
@@ -290,7 +290,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     }
     
     /**
-     * @return boolean
+     * {@inheritdoc}
      */
     public function isFreshCache()
     {
