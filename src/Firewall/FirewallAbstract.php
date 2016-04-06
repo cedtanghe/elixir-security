@@ -9,6 +9,7 @@ use Elixir\Config\Writer\WriterInterface;
 use Elixir\Dispatcher\DispatcherTrait;
 use Elixir\Security\Auth\AuthManager;
 use Elixir\Security\Firewall\AccessControlInterface;
+use Elixir\Security\Firewall\Behavior\BehaviorInterface;
 use Elixir\Security\Firewall\FirewallInterface;
 use Elixir\Security\Firewall\LoadParser;
 
@@ -44,6 +45,16 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
      * @var array
      */
     protected $accessControls = [];
+    
+    /**
+     * @var BehaviorInterface 
+     */
+    protected $failedBehavior;
+    
+    /**
+     * @var BehaviorInterface 
+     */
+    protected $successBehavior;
     
     /**
      * @param AuthManager $authManager
@@ -113,6 +124,45 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
         }
         
         return $this->cache->cacheLoaded();
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function setFailedBehavior(BehaviorInterface $behavior)
+    {
+        $this->failedBehavior = $behavior;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function setSucessBehavior(BehaviorInterface $behavior)
+    {
+        $this->successBehavior = $behavior;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function applyBehavior($authorize)
+    {
+        if ($authorize)
+        {
+            if (null !== $this->successBehavior)
+            {
+                $behavior = $this->successBehavior;
+                return $behavior($this);
+            }
+        }
+        else
+        {
+            if (null !== $this->failedBehavior)
+            {
+                $behavior = $this->failedBehavior;
+                return $behavior($this);
+            }
+        }
     }
     
     /**

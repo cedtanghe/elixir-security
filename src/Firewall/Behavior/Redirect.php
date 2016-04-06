@@ -110,14 +110,6 @@ class Redirect implements BehaviorInterface
         $this->session->flash(SessionInterface::FLASH_REDIRECT, $this->currentURL);
         $this->session->flash(SessionInterface::FLASH_INFO, $this->message);
         
-        if (class_exists('\Elixir\HTTP\ResponseFactory'))
-        {
-            ResponseFactory::createRedirect($this->redirectURL, 302, [], true);
-        }
-        else
-        {
-            header('Location : ' . $this->redirectURL, true, 302);
-            exit();
-        }
+        return ResponseFactory::createRedirect($this->redirectURL, 302, [], false);
     }
 }

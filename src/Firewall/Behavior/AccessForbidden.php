@@ -2,7 +2,6 @@
 
 namespace Elixir\Security\Firewall\Behavior;
 
-use Elixir\MVC\Exception\ForbiddenException;
 use Elixir\Security\Firewall\Behavior\BehaviorInterface;
 use Elixir\Security\Firewall\FirewallInterface;
 use Elixir\STDLib\Facade\I18N;
@@ -35,10 +34,10 @@ class AccessForbidden implements BehaviorInterface
     
     /**
      * {@inheritdoc}
-     * @throws ForbiddenException
+     * @throws \Exception
      */
     public function __invoke(FirewallInterface $firewall)
     {
-        throw new ForbiddenException($this->message);
+        throw new \Exception($this->message, 403);
     }
 }
