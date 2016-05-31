@@ -54,9 +54,9 @@ class FirewallEvent extends Event
      * {@inheritdoc}
      * @param array $params
      */
-    public function __construct($pType, array $params = [])
+    public function __construct($type, array $params = [])
     {
-        parent::__construct($pType);
+        parent::__construct($type);
         
         $params += [
             'resource' => null,
