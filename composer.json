@@ -11,25 +11,9 @@
     ],
     "homepage": "https://github.com/cedtanghe/elixir-security",
     "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/cedtanghe/elixir-http"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/cedtanghe/elixir-session"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/cedtanghe/elixir-stdlib"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/cedtanghe/elixir-config"
-        }
     ],
     "require": {
-        "php": ">=5.4",
+        "php": ">=5.6",
         "elixir/elixir-stdlib": "*"
     },
     "require-dev": {
@@ -48,7 +32,6 @@
     "suggest": {
         "elixir/elixir-http": "*",
         "elixir/elixir-session": "*",
-        "elixir/elixir-config": "*",
-        "ircmaxell/password-compat": "php version < 5.5"
+        "elixir/elixir-config": "*"
     }
 }

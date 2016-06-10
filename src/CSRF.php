@@ -4,8 +4,10 @@ namespace Elixir\Security;
 
 use Elixir\HTTP\ServerRequestFactory;
 use Elixir\Session\Session;
-use Elixir\STDLib\ArrayUtils;
 use Psr\Http\Message\ServerRequestInterface;
+use function Elixir\STDLib\array_get;
+use function Elixir\STDLib\array_remove;
+use function Elixir\STDLib\array_set;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -87,7 +89,7 @@ class CSRF
 
         $token = uniqid(rand(), true);
         
-        ArrayUtils::set(
+        array_set(
             [self::TOKEN_KEY, $name . $token], 
             [
                 'expire' => $time + $config['time'], 
@@ -129,7 +131,7 @@ class CSRF
         
         $error = false;
         $name .= $options['token'];
-        $config = ArrayUtils::get([self::TOKEN_KEY, $name], $this->storage, []);
+        $config = array_get([self::TOKEN_KEY, $name], $this->storage, []);
         $time = isset($config['expire']) ? $config['expire'] : 0;
 
         if (time() > $time)
@@ -151,12 +153,12 @@ class CSRF
 
         if ($error || !$regenerate)
         {
-            ArrayUtils::remove([self::TOKEN_KEY, $name], $this->storage);
+            array_remove([self::TOKEN_KEY, $name], $this->storage);
         }
         else if ($regenerate)
         {
             $config['expire'] = time() + $config['time'];
-            ArrayUtils::set([self::TOKEN_KEY, $name], $config, $this->storage);
+            array_set([self::TOKEN_KEY, $name], $config, $this->storage);
         }
         
         $this->invalidate();
@@ -168,7 +170,7 @@ class CSRF
      */
     public function invalidate() 
     {
-        $tokens = ArrayUtils::get(self::TOKEN_KEY, $this->storage, []);
+        $tokens = array_get(self::TOKEN_KEY, $this->storage, []);
         $time = time();
 
         foreach ($tokens as $key => $config)
@@ -181,6 +183,6 @@ class CSRF
             }
         }
 
-        ArrayUtils::set(self::TOKEN_KEY, $tokens, $this->storage);
+        array_set(self::TOKEN_KEY, $tokens, $this->storage);
     }
 }

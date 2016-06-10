@@ -7,8 +7,8 @@ use Elixir\Security\Firewall\Behavior\BehaviorInterface;
 use Elixir\Security\Firewall\FirewallInterface;
 use Elixir\Session\Session;
 use Elixir\Session\SessionInterface as SessionInterface;
-use Elixir\STDLib\ArrayUtils;
 use Elixir\STDLib\Facade\I18N;
+use function Elixir\STDLib\array_get;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -49,9 +49,9 @@ class Redirect implements BehaviorInterface
         if (!$this->currentURL)
         {
             $URI = '';
-            $HTTPS = ArrayUtils::get('HTTPS', $_SERVER);
+            $HTTPS = array_get('HTTPS', $_SERVER);
 
-            if ($HTTPS && $HTTPS !== 'on' || ArrayUtils::get('HTTP_X_FORWARDED_PROTO', $_SERVER) === 'https')
+            if ($HTTPS && $HTTPS !== 'on' || array_get('HTTP_X_FORWARDED_PROTO', $_SERVER) === 'https')
             {
                 $URI = 'https://';
             }
@@ -60,8 +60,8 @@ class Redirect implements BehaviorInterface
                 $URI = 'http://';
             }
 
-            $URI .= ArrayUtils::get('HTTP_HOST', $_SERVER, '');
-            $URI .= ArrayUtils::get('REQUEST_URI', $_SERVER, '');
+            $URI .= array_get('HTTP_HOST', $_SERVER, '');
+            $URI .= array_get('REQUEST_URI', $_SERVER, '');
 
             $this->currentURL = $URI;
         }

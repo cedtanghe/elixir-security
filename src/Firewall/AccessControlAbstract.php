@@ -3,7 +3,10 @@
 namespace Elixir\Security\Firewall;
 
 use Elixir\Security\Firewall\AccessControlInterface;
-use Elixir\STDLib\ArrayUtils;
+use function Elixir\STDLib\array_get;
+use function Elixir\STDLib\array_has;
+use function Elixir\STDLib\array_remove;
+use function Elixir\STDLib\array_set;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -44,7 +47,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
      */
     public function hasOption($option) 
     {
-        return ArrayUtils::has($option, $this->options);
+        return array_has($option, $this->options);
     }
 
     /**
@@ -54,7 +57,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
      */
     public function getOption($option, $default = null)
     {
-        return ArrayUtils::get($option, $this->options, $default);
+        return array_get($option, $this->options, $default);
     }
     
     /**
@@ -63,7 +66,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
      */
     public function addOption($option, $value) 
     {
-        ArrayUtils::set($option, $value, $this->options);
+        array_set($option, $value, $this->options);
     }
     
     /**
@@ -71,7 +74,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
      */
     public function removeOption($option) 
     {
-        ArrayUtils::remove($option, $this->options);
+        array_remove($option, $this->options);
     }
 
     /**
