@@ -15,19 +15,19 @@ class Hash
     /**
      * @param string $algo
      * @param string $str
-     * @param boolean $raw
+     * @param bool   $raw
+     *
      * @return string
+     *
      * @throws \InvalidArgumentException
      */
     public static function hash($algo, $str, $raw = false)
     {
-        if (null === static::$supportedAlgorithms) 
-        {
+        if (null === static::$supportedAlgorithms) {
             static::$supportedAlgorithms = hash_algos();
         }
 
-        if (!in_array(strtolower($algo), static::$supportedAlgorithms))
-        {
+        if (!in_array(strtolower($algo), static::$supportedAlgorithms)) {
             throw new \InvalidArgumentException(sprintf('Algorithm "%s" is not supported.', $algo));
         }
 
@@ -35,77 +35,71 @@ class Hash
     }
 
     /**
-     * @param string $password
-     * @param integer|array $config
+     * @param string    $password
+     * @param int|array $config
+     *
      * @return string
      */
     public static function password($password, $config = null)
     {
-        if (is_array($config))
-        {
+        if (is_array($config)) {
             $algo = isset($config['algo']) ? $config['algo'] : PASSWORD_DEFAULT;
-            
+
             unset($config['algo']);
             $options = $config;
-        }
-        else if (!empty($config))
-        {
+        } elseif (!empty($config)) {
             $algo = $config;
             $options = [];
-        }
-        else
-        {
+        } else {
             $algo = PASSWORD_DEFAULT;
             $options = [];
         }
-        
+
         return password_hash($password, $algo, $options);
     }
-    
+
     /**
      * @param string $password
      * @param string $hash
-     * @return boolean
+     *
+     * @return bool
      */
-    public static function validate($password, $hash) 
+    public static function validate($password, $hash)
     {
         return password_verify($password, $hash);
     }
-    
+
     /**
-     * @param string $hash
-     * @param integer|array $config
-     * @return boolean
+     * @param string    $hash
+     * @param int|array $config
+     *
+     * @return bool
      */
-    public static function needsRehash($hash, $config = null) 
+    public static function needsRehash($hash, $config = null)
     {
-        if (is_array($config))
-        {
+        if (is_array($config)) {
             $algo = isset($config['algo']) ? $config['algo'] : PASSWORD_DEFAULT;
-            
+
             unset($config['algo']);
             $options = $config;
-        }
-        else if (!empty($config))
-        {
+        } elseif (!empty($config)) {
             $algo = $config;
             $options = [];
-        }
-        else
-        {
+        } else {
             $infos = static::hashInfo($hash);
             $algo = $infos['algo'];
             $options = $infos['options'];
         }
-        
+
         return password_needs_rehash($hash, $algo, $options);
     }
-    
+
     /**
      * @param string $hash
+     *
      * @return array
      */
-    public static function hashInfo($hash) 
+    public static function hashInfo($hash)
     {
         return password_get_info($hash);
     }

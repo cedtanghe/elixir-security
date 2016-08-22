@@ -7,7 +7,7 @@ use Elixir\Security\Firewall\FirewallInterface;
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-interface BehaviorInterface 
+interface BehaviorInterface
 {
     /**
      * @param FirewallInterface $firewall

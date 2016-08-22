@@ -3,7 +3,6 @@
 namespace Elixir\Security\Firewall\Behavior;
 
 use Elixir\HTTP\ResponseFactory;
-use Elixir\Security\Firewall\Behavior\BehaviorInterface;
 use Elixir\Security\Firewall\FirewallInterface;
 use Elixir\Session\Session;
 use Elixir\Session\SessionInterface as SessionInterface;
@@ -16,7 +15,7 @@ use function Elixir\STDLib\array_get;
 class Redirect implements BehaviorInterface
 {
     /**
-     * @var string 
+     * @var string
      */
     protected $message;
 
@@ -24,39 +23,35 @@ class Redirect implements BehaviorInterface
      * @var string
      */
     protected $redirectURL;
-    
+
     /**
      * @var string
      */
     protected $currentURL;
-    
+
     /**
      * @var SessionInterface
      */
     protected $session;
 
     /**
-     * @param string $redirectURL
-     * @param string $currentURL
-     * @param string $message
+     * @param string           $redirectURL
+     * @param string           $currentURL
+     * @param string           $message
      * @param SessionInterface $session
      */
     public function __construct($redirectURL, $currentURL = null, $message = null, SessionInterface $session = null)
     {
         $this->redirectURL = $redirectURL;
         $this->currentURL = $currentURL;
-        
-        if (!$this->currentURL)
-        {
+
+        if (!$this->currentURL) {
             $URI = '';
             $HTTPS = array_get('HTTPS', $_SERVER);
 
-            if ($HTTPS && $HTTPS !== 'on' || array_get('HTTP_X_FORWARDED_PROTO', $_SERVER) === 'https')
-            {
+            if ($HTTPS && $HTTPS !== 'on' || array_get('HTTP_X_FORWARDED_PROTO', $_SERVER) === 'https') {
                 $URI = 'https://';
-            }
-            else
-            {
+            } else {
                 $URI = 'http://';
             }
 
@@ -65,11 +60,11 @@ class Redirect implements BehaviorInterface
 
             $this->currentURL = $URI;
         }
-        
-        $this->message = $message ? : I18N::__('Please log in.', ['context' => 'elixir']);
+
+        $this->message = $message ?: I18N::__('Please log in.', ['context' => 'elixir']);
         $this->session = $session ?: Session::instance();
     }
-    
+
     /**
      * @return string
      */
@@ -77,7 +72,7 @@ class Redirect implements BehaviorInterface
     {
         return $this->redirectURL;
     }
-    
+
     /**
      * @return string
      */
@@ -109,7 +104,7 @@ class Redirect implements BehaviorInterface
     {
         $this->session->flash(SessionInterface::FLASH_REDIRECT, $this->currentURL);
         $this->session->flash(SessionInterface::FLASH_INFO, $this->message);
-        
+
         return ResponseFactory::createRedirect($this->redirectURL, 302, [], false);
     }
 }

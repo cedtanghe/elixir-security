@@ -2,13 +2,10 @@
 
 namespace Elixir\Security\RBAC;
 
-use Elixir\Security\RBAC\RBACInterface;
-use Elixir\Security\RBAC\Role;
-
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-class RBAC implements RBACInterface 
+class RBAC implements RBACInterface
 {
     /**
      * @var array
@@ -18,7 +15,7 @@ class RBAC implements RBACInterface
     /**
      * @param array $roles
      */
-    public function __construct(array $roles = []) 
+    public function __construct(array $roles = [])
     {
         $this->setRoles($roles);
     }
@@ -28,15 +25,12 @@ class RBAC implements RBACInterface
      */
     public function hasRole($role)
     {
-        if ($role instanceof Role)
-        {
+        if ($role instanceof Role) {
             $role = $role->getName();
         }
-        
-        foreach ($this->roles as $role)
-        {
-            if ($role->getName() == $role)
-            {
+
+        foreach ($this->roles as $role) {
+            if ($role->getName() == $role) {
                 return true;
             }
         }
@@ -45,28 +39,24 @@ class RBAC implements RBACInterface
     }
 
     /**
-     * @param string|integer|Role $role
-     * @param string|array $parents
+     * @param string|int|Role $role
+     * @param string|array    $parents
      */
     public function addRole($role, $parents = [])
     {
-        if (!$role instanceof Role)
-        {
+        if (!$role instanceof Role) {
             $role = new Role($role);
         }
 
         $role->setRBAC($this);
         $this->roles[] = $role;
 
-        foreach ((array)$parents as $parent) 
-        {
-            if (!$parent instanceof Role) 
-            {
+        foreach ((array) $parents as $parent) {
+            if (!$parent instanceof Role) {
                 $parent = $this->getRole(
-                    $parent, 
-                    function() use ($parent)
-                    { 
-                        return new Role($parent); 
+                    $parent,
+                    function () use ($parent) {
+                        return new Role($parent);
                     }
                 );
             }
@@ -77,50 +67,45 @@ class RBAC implements RBACInterface
     }
 
     /**
-     * @param string|integer|Role $role
-     * @return boolean
+     * @param string|int|Role $role
+     *
+     * @return bool
      */
-    public function removeRole($role) 
+    public function removeRole($role)
     {
-        if ($role instanceof Role)
-        {
+        if ($role instanceof Role) {
             $role = $role->getName();
         }
-        
+
         $i = count($this->roles);
 
-        while ($i--)
-        {
+        while ($i--) {
             $r = $this->roles[$i];
 
-            if ($r->getName() == $role)
-            {
+            if ($r->getName() == $role) {
                 array_splice($this->roles, $i, 1);
             }
         }
 
-        foreach ($this->roles as $r)
-        {
+        foreach ($this->roles as $r) {
             $r->removeChild($role);
         }
     }
-    
+
     /**
-     * @param string|integer|Role $role
-     * @param mixed $default
+     * @param string|int|Role $role
+     * @param mixed           $default
+     *
      * @return Role
      */
     public function getRole($role, $default = null)
     {
-        if ($role instanceof Role)
-        {
+        if ($role instanceof Role) {
             return $role;
         }
-        
-        foreach ($this->roles as $r)
-        {
-            if ($r->getName() == $role)
-            {
+
+        foreach ($this->roles as $r) {
+            if ($r->getName() == $role) {
                 return $r;
             }
         }
@@ -131,7 +116,7 @@ class RBAC implements RBACInterface
     /**
      * {@inheritdoc}
      */
-    public function getRoles() 
+    public function getRoles()
     {
         return $this->roles;
     }
@@ -143,31 +128,26 @@ class RBAC implements RBACInterface
     {
         $this->roles = [];
 
-        foreach ($data as $config)
-        {
+        foreach ($data as $config) {
             $role = $config;
             $permissions = [];
             $parents = [];
 
-            if (is_array($config)) 
-            {
+            if (is_array($config)) {
                 $role = $config['role'];
 
-                if (isset($config['permissions']))
-                {
+                if (isset($config['permissions'])) {
                     $permissions = $config['permissions'];
                 }
 
-                if (isset($config['parents'])) 
-                {
+                if (isset($config['parents'])) {
                     $parents = $config['parents'];
                 }
             }
 
             $role = $role instanceof Role ? $role : new Role($role);
 
-            if (count($permissions) > 0) 
-            {
+            if (count($permissions) > 0) {
                 $role->setPermissions($permissions);
             }
 
@@ -178,42 +158,34 @@ class RBAC implements RBACInterface
     /**
      * {@inheritdoc}
      */
-    public function isGranted($role = null, $permission = null, callable $assert = null) 
+    public function isGranted($role = null, $permission = null, callable $assert = null)
     {
-        $permissionExists = function($permission, array $roles)
-        {
-            if (null === $permission)
-            {
+        $permissionExists = function ($permission, array $roles) {
+            if (null === $permission) {
                 return true;
             }
-            
-            foreach ($roles as $r)
-            {
-                if ($r->hasPermission($permission))
-                {
+
+            foreach ($roles as $r) {
+                if ($r->hasPermission($permission)) {
                     return true;
                 }
             }
-            
+
             return false;
         };
-        
-        if ($role && $this->hasRole($role)) 
-        {
+
+        if ($role && $this->hasRole($role)) {
             $hasRole = true;
             $hasPermission = $permissionExists($permission, [$this->getRole($role)]);
-        } 
-        else 
-        {
+        } else {
             $hasRole = null === $role;
             $hasPermission = $permissionExists($permission, $this->roles);
         }
 
-        if (null !== $assert) 
-        {
+        if (null !== $assert) {
             return true === call_user_func_array($assert, [['has_role' => $hasRole, 'has_permission' => $hasPermission, 'RBAC' => $this]]);
         }
-        
+
         return $hasRole && $hasPermission;
     }
 }

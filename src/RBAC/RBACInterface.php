@@ -2,16 +2,15 @@
 
 namespace Elixir\Security\RBAC;
 
-use Elixir\Security\RBAC\Role;
-
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-interface RBACInterface 
+interface RBACInterface
 {
     /**
-     * @param string|integer|Role $role
-     * @return boolean
+     * @param string|int|Role $role
+     *
+     * @return bool
      */
     public function hasRole($role);
 
@@ -21,10 +20,11 @@ interface RBACInterface
     public function getRoles();
 
     /**
-     * @param string|integer $role
-     * @param string|integer|array $permission
-     * @param callable $assert
-     * @return boolean
+     * @param string|int       $role
+     * @param string|int|array $permission
+     * @param callable         $assert
+     *
+     * @return bool
      */
     public function isGranted($role = null, $permission = null, callable $assert = null);
 }

@@ -3,7 +3,6 @@
 namespace Elixir\Security\Firewall;
 
 use Elixir\Dispatcher\Event;
-use Elixir\Security\Firewall\AccessControlInterface;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -52,21 +51,22 @@ class FirewallEvent extends Event
 
     /**
      * {@inheritdoc}
+     *
      * @param array $params
      */
     public function __construct($type, array $params = [])
     {
         parent::__construct($type);
-        
+
         $params += [
             'resource' => null,
-            'access_control' => null
+            'access_control' => null,
         ];
-        
+
         $this->resource = $params['resource'];
         $this->accessControl = $params['access_control'];
     }
-    
+
     /**
      * @return string
      */

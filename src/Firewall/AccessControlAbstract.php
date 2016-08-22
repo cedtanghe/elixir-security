@@ -2,7 +2,6 @@
 
 namespace Elixir\Security\Firewall;
 
-use Elixir\Security\Firewall\AccessControlInterface;
 use function Elixir\STDLib\array_get;
 use function Elixir\STDLib\array_has;
 use function Elixir\STDLib\array_remove;
@@ -17,22 +16,22 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
      * @var array
      */
     protected $options = [];
-    
+
     /**
      * @var string
      */
     protected $pattern;
-    
+
     /**
      * @param string $pattern
-     * @param array $options
+     * @param array  $options
      */
     public function __construct($pattern, array $options = [])
     {
         $this->pattern = $pattern;
         $this->mergeOptions($options);
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -43,9 +42,10 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
 
     /**
      * @param mixed $option
-     * @return boolean
+     *
+     * @return bool
      */
-    public function hasOption($option) 
+    public function hasOption($option)
     {
         return array_has($option, $this->options);
     }
@@ -53,26 +53,27 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     /**
      * @param mixed $option
      * @param mixed $default
+     *
      * @return mixed
      */
     public function getOption($option, $default = null)
     {
         return array_get($option, $this->options, $default);
     }
-    
+
     /**
      * @param mixed $option
      * @param mixed $value
      */
-    public function addOption($option, $value) 
+    public function addOption($option, $value)
     {
         array_set($option, $value, $this->options);
     }
-    
+
     /**
      * @param mixed $option
      */
-    public function removeOption($option) 
+    public function removeOption($option)
     {
         array_remove($option, $this->options);
     }
@@ -92,19 +93,17 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     {
         $this->options = [];
 
-        foreach ($options as $key => $value)
-        {
+        foreach ($options as $key => $value) {
             $this->addOption($key, $value);
         }
     }
-    
+
     /**
      * @param AccessControlInterface|array $options
      */
     public function mergeOptions($options)
     {
-        if ($options instanceof self) 
-        {
+        if ($options instanceof self) {
             $options = $options->allOptions();
         }
 
@@ -122,7 +121,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     /**
      * @ignore
      */
-    public function offsetSet($key, $value) 
+    public function offsetSet($key, $value)
     {
         $this->addOption($key, $value);
     }
@@ -130,7 +129,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     /**
      * @ignore
      */
-    public function offsetGet($key) 
+    public function offsetGet($key)
     {
         return $this->getOption($key);
     }
@@ -142,7 +141,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     {
         $this->removeOption($key);
     }
-    
+
     /**
      * @ignore
      */
@@ -150,7 +149,7 @@ abstract class AccessControlAbstract implements AccessControlInterface, \ArrayAc
     {
         return [
             'options' => $this->options,
-            'pattern' => $this->pattern
+            'pattern' => $this->pattern,
         ];
     }
 }

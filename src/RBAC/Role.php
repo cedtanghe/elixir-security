@@ -2,12 +2,10 @@
 
 namespace Elixir\Security\RBAC;
 
-use Elixir\Security\RBAC\RBACInterface;
-
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-class Role 
+class Role
 {
     /**
      * @var string
@@ -15,7 +13,7 @@ class Role
     const ALL_PERMISSIONS_GRANTED = 'all_permissions_granted';
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $name;
 
@@ -35,8 +33,8 @@ class Role
     protected $children = [];
 
     /**
-     * @param string|integer $name
-     * @param array $permisions
+     * @param string|int $name
+     * @param array      $permisions
      */
     public function __construct($name, array $permisions = [])
     {
@@ -45,15 +43,16 @@ class Role
     }
 
     /**
-     * @return string|integer
+     * @return string|int
      */
-    public function getName() 
+    public function getName()
     {
         return $this->name;
     }
 
     /**
      * @internal
+     *
      * @param RBACInterface $RBAC
      */
     public function setRBAC(RBACInterface $RBAC)
@@ -64,65 +63,60 @@ class Role
     /**
      * @return RBACInterface
      */
-    public function getRBAC() 
+    public function getRBAC()
     {
         return $this->RBAC;
     }
 
     /**
-     * @param string|integer|self $role
-     * @return boolean
+     * @param string|int|self $role
+     *
+     * @return bool
      */
-    public function hasChild($role) 
+    public function hasChild($role)
     {
-        if ($role instanceof self)
-        {
+        if ($role instanceof self) {
             $role = $role->getName();
         }
-        
+
         return array_key_exists($role, $this->children);
     }
 
     /**
-     * @param string|integer|self $role
+     * @param string|int|self $role
      */
-    public function addChild($role) 
+    public function addChild($role)
     {
-        if (!$role instanceof self)
-        {
+        if (!$role instanceof self) {
             $role = new self($role);
         }
-        
+
         $this->children[$role->getName()] = $role;
     }
 
     /**
-     * @param string|integer|self $role
+     * @param string|int|self $role
      */
     public function removeChild($role)
     {
-        if ($role instanceof self)
-        {
+        if ($role instanceof self) {
             $role = $role->getName();
         }
-        
+
         unset($this->children[$role]);
     }
 
     /**
-     * @param string|integer $permission
-     * @return boolean
+     * @param string|int $permission
+     *
+     * @return bool
      */
     public function hasPermission($permission)
     {
-        foreach ([$permission, self::ALL_PERMISSIONS_GRANTED] as $perm)
-        {
-            if (array_key_exists($perm, $this->permissions))
-            {
-                if (true !== $this->permissions[$perm]) 
-                {
-                    if (!call_user_func_array($this->permissions[$perm], [$this->RBAC]))
-                    {
+        foreach ([$permission, self::ALL_PERMISSIONS_GRANTED] as $perm) {
+            if (array_key_exists($perm, $this->permissions)) {
+                if (true !== $this->permissions[$perm]) {
+                    if (!call_user_func_array($this->permissions[$perm], [$this->RBAC])) {
                         continue;
                     }
                 }
@@ -131,10 +125,8 @@ class Role
             }
         }
 
-        foreach ($this->children as $child) 
-        {
-            if ($child->hasPermission($permission)) 
-            {
+        foreach ($this->children as $child) {
+            if ($child->hasPermission($permission)) {
                 return true;
             }
         }
@@ -143,18 +135,18 @@ class Role
     }
 
     /**
-     * @param string|integer $permission
-     * @param callable $assert
+     * @param string|int $permission
+     * @param callable   $assert
      */
-    public function addPermission($permission, callable $assert = null) 
+    public function addPermission($permission, callable $assert = null)
     {
         $this->permissions[$permission] = $assert ?: true;
     }
 
     /**
-     * @param string|integer $permission
+     * @param string|int $permission
      */
-    public function removePermission($permission) 
+    public function removePermission($permission)
     {
         unset($this->permissions[$permission]);
     }
@@ -162,7 +154,7 @@ class Role
     /**
      * @return array
      */
-    public function getPermissions() 
+    public function getPermissions()
     {
         return $this->permissions;
     }
@@ -170,39 +162,34 @@ class Role
     /**
      * @param array $permissions
      */
-    public function setPermissions(array $permissions) 
+    public function setPermissions(array $permissions)
     {
         $this->permissions = [];
 
-        foreach ($permissions as $config)
-        {
-            if (is_array($config))
-            {
+        foreach ($permissions as $config) {
+            if (is_array($config)) {
                 $this->addPermission($config['permission'], isset($config['assert']) ? $config['assert'] : null);
-            } 
-            else
-            {
+            } else {
                 $this->addPermission($config);
             }
         }
     }
-    
+
     /**
      * @ignore
      */
     public function __debugInfo()
     {
         $children = [];
-        
-        foreach ($this->children as $child)
-        {
+
+        foreach ($this->children as $child) {
             $children[] = $child->getName();
         }
-        
+
         return [
             'name' => $this->name,
             'permissions' => $this->permissions,
-            'children' => $children
+            'children' => $children,
         ];
     }
 }

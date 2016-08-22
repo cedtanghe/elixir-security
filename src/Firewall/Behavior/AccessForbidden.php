@@ -2,7 +2,6 @@
 
 namespace Elixir\Security\Firewall\Behavior;
 
-use Elixir\Security\Firewall\Behavior\BehaviorInterface;
 use Elixir\Security\Firewall\FirewallInterface;
 use Elixir\STDLib\Facade\I18N;
 
@@ -12,7 +11,7 @@ use Elixir\STDLib\Facade\I18N;
 class AccessForbidden implements BehaviorInterface
 {
     /**
-     * @var string 
+     * @var string
      */
     protected $message;
 
@@ -31,9 +30,10 @@ class AccessForbidden implements BehaviorInterface
     {
         return $this->message;
     }
-    
+
     /**
      * {@inheritdoc}
+     *
      * @throws \Exception
      */
     public function __invoke(FirewallInterface $firewall)

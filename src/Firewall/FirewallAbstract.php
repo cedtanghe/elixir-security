@@ -8,10 +8,7 @@ use Elixir\Config\Loader\LoaderFactoryAwareTrait;
 use Elixir\Config\Writer\WriterInterface;
 use Elixir\Dispatcher\DispatcherTrait;
 use Elixir\Security\Auth\AuthManager;
-use Elixir\Security\Firewall\AccessControlInterface;
 use Elixir\Security\Firewall\Behavior\BehaviorInterface;
-use Elixir\Security\Firewall\FirewallInterface;
-use Elixir\Security\Firewall\LoadParser;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -20,42 +17,42 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
 {
     use LoaderFactoryAwareTrait;
     use DispatcherTrait;
-    
+
     /**
-     * @var integer
+     * @var int
      */
     protected $serial = 0;
-    
+
     /**
-     * @var boolean
+     * @var bool
      */
     protected $sorted = false;
-    
+
     /**
-     * @var CacheableInterface 
+     * @var CacheableInterface
      */
     protected $cache;
-    
+
     /**
      * @var AuthManager
      */
     protected $authManager;
-    
+
     /**
      * @var array
      */
     protected $accessControls = [];
-    
+
     /**
-     * @var BehaviorInterface 
+     * @var BehaviorInterface
      */
     protected $failedBehavior;
-    
+
     /**
-     * @var BehaviorInterface 
+     * @var BehaviorInterface
      */
     protected $successBehavior;
-    
+
     /**
      * @param AuthManager $authManager
      */
@@ -63,7 +60,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $this->authManager = $authManager;
     }
-    
+
     /**
      * @return AuthManager
      */
@@ -71,7 +68,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         return $this->authManager;
     }
-    
+
     /**
      * @param CacheableInterface $value
      */
@@ -79,7 +76,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $this->cache = $value;
     }
-    
+
     /**
      * @return CacheableInterface
      */
@@ -87,45 +84,41 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         return $this->cache;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function loadCache()
     {
-        if (null === $this->cache)
-        {
+        if (null === $this->cache) {
             return false;
         }
-        
+
         $data = $this->cache->loadCache();
-        
-        if ($data)
-        {
+
+        if ($data) {
             $data = LoadParser::parse($data, get_class($this));
-            
-            foreach ($data as $config)
-            {
+
+            foreach ($data as $config) {
                 $this->addAccessControl($config['access_control'], $config['priority']);
             }
         }
-        
+
         return $data;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function cacheLoaded()
     {
-        if (null === $this->cache)
-        {
+        if (null === $this->cache) {
             return false;
         }
-        
+
         return $this->cache->cacheLoaded();
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -133,7 +126,7 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $this->failedBehavior = $behavior;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -141,71 +134,59 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $this->successBehavior = $behavior;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function applyBehavior($authorize)
     {
-        if ($authorize)
-        {
-            if (null !== $this->successBehavior)
-            {
+        if ($authorize) {
+            if (null !== $this->successBehavior) {
                 $behavior = $this->successBehavior;
+
                 return $behavior($this);
             }
-        }
-        else
-        {
-            if (null !== $this->failedBehavior)
-            {
+        } else {
+            if (null !== $this->failedBehavior) {
                 $behavior = $this->failedBehavior;
+
                 return $behavior($this);
             }
         }
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function load($config, array $options = [])
     {
-        if ($this->cacheLoaded() && $this->isFreshCache())
-        {
+        if ($this->cacheLoaded() && $this->isFreshCache()) {
             return;
         }
-        
-        if ($config instanceof self)
-        {
+
+        if ($config instanceof self) {
             $this->merge($config);
-        } 
-        else 
-        {
-            if (is_callable($config))
-            {
+        } else {
+            if (is_callable($config)) {
                 $data = call_user_func_array($config, [$this]);
-            }
-            else
-            {
-                if (null === $this->loaderFactory)
-                {
+            } else {
+                if (null === $this->loaderFactory) {
                     $this->loaderFactory = new LoaderFactory();
                     LoaderFactory::addProvider($this->loaderFactory);
                 }
-                
+
                 $loader = $this->loaderFactory->create($config);
                 $data = $loader->load($config);
             }
-            
+
             $data = LoadParser::parse($data, get_class($this));
-            
-            foreach ($data as $config)
-            {
+
+            foreach ($data as $config) {
                 $this->addAccessControl($config['access_control'], $config['priority']);
             }
         }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -213,76 +194,71 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         return $writer->export($this->getExportableData(), $file);
     }
-    
+
     /**
      * @param AccessControlInterface $accessControl
-     * @return boolean
+     *
+     * @return bool
      */
     public function hasAccessControl(AccessControlInterface $accessControl)
     {
-        foreach ($this->accessControls as $value)
-        {
-            if ($value['access_control'] === $accessControl)
-            {
+        foreach ($this->accessControls as $value) {
+            if ($value['access_control'] === $accessControl) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * @param AccessControlInterface $accessControl
-     * @param integer $priority
+     * @param int                    $priority
      */
     public function addAccessControl(AccessControlInterface $accessControl, $priority = 0)
     {
-        if (!$this->hasAccessControl($accessControl))
-        {
+        if (!$this->hasAccessControl($accessControl)) {
             $this->sorted = false;
-            
+
             $this->accessControls[] = [
                 'access_control' => $accessControl,
-                'priority' =>$priority, 
-                'serial' => $this->serial++
+                'priority' => $priority,
+                'serial' => $this->serial++,
             ];
         }
     }
-    
+
     /**
      * @param AccessControlInterface $accessControl
      */
     public function removeAccessControl(AccessControlInterface $accessControl)
     {
         $i = count($this->accessControls);
-        
-        while ($i--)
-        {
+
+        while ($i--) {
             $config = $this->accessControls[$i];
-            
-            if ($config['access_control'] === $accessControl)
-            {
+
+            if ($config['access_control'] === $accessControl) {
                 array_splice($this->accessControls, $i, 1);
                 break;
             }
         }
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function allAccessControls($withInfos = false)
     {
         $accessControls = [];
-            
-        foreach ($this->accessControls as $config)
-        {
+
+        foreach ($this->accessControls as $config) {
             $accessControls[] = $withInfos ? $config : $config['access_control'];
         }
 
         return $accessControls;
     }
-    
+
     /**
      * @param array $accessControls
      */
@@ -290,104 +266,90 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $this->accessControls = [];
         $this->serial = 0;
-        
-        foreach ($accessControls as $config)
-        {
+
+        foreach ($accessControls as $config) {
             $accessControl = $config;
             $priority = 0;
-            
-            if (is_array($config))
-            {
+
+            if (is_array($config)) {
                 $accessControl = $config['access_control'];
-                
-                if (isset($config['priority']))
-                {
+
+                if (isset($config['priority'])) {
                     $priority = $config['priority'];
                 }
             }
-            
+
             $this->addAccessControl($accessControl, $priority);
         }
     }
-    
-    /**
-     * @return void
-     */
-    public function sort() 
+
+    public function sort()
     {
-        if (!$this->sorted)
-        {
-            uasort($this->accessControls, function (array $p1, array $p2)
-            {
-                if ($p1['priority'] === $p2['priority']) 
-                {
+        if (!$this->sorted) {
+            uasort($this->accessControls, function (array $p1, array $p2) {
+                if ($p1['priority'] === $p2['priority']) {
                     return ($p1['serial'] < $p2['serial']) ? -1 : 1;
                 }
 
                 return ($p1['priority'] > $p2['priority']) ? -1 : 1;
             });
-        
+
             $this->sorted = true;
         }
     }
-    
+
     /**
-     * @return boolean
+     * @return bool
      */
     public function isSorted()
     {
         return $this->sorted;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function isFreshCache()
     {
-        if (null === $this->cache)
-        {
+        if (null === $this->cache) {
             return false;
         }
-        
+
         return $this->cache->isFreshCache();
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function exportToCache(array $data = null)
     {
-        if (null === $this->cache)
-        {
+        if (null === $this->cache) {
             return false;
         }
-        
-        if ($data)
-        {
+
+        if ($data) {
             $data = LoadParser::parse($data, get_class($this));
-            
-            foreach ($data as $config)
-            {
+
+            foreach ($data as $config) {
                 $this->addAccessControl($config['access_control'], $config['priority']);
             }
         }
-        
+
         return $this->cache->exportToCache($this->getExportableData());
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function invalidateCache()
     {
-        if (null === $this->cache)
-        {
+        if (null === $this->cache) {
             return false;
         }
-        
+
         return $this->cache->invalidateCache();
     }
-    
+
     /**
      * @return array
      */
@@ -395,17 +357,16 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $data = [];
 
-        foreach ($this->allAccessControls(true) as $config)
-        {
+        foreach ($this->allAccessControls(true) as $config) {
             $data[$config['access_control']->getPattern()] = [
                 'options' => $config['access_control']->getOptions(),
-                'priority' => $config['priority']
+                'priority' => $config['priority'],
             ];
         }
-        
+
         return $data;
     }
-    
+
     /**
      * @param FirewallInterface $firewall
      */
@@ -413,38 +374,31 @@ abstract class FirewallAbstract implements FirewallInterface, CacheableInterface
     {
         $accessControls = $firewall->allAccessControls(true);
 
-        if (count($accessControls) > 0) 
-        {
+        if (count($accessControls) > 0) {
             $this->sorted = false;
-            
-            foreach ($accessControls as $config)
-            {
+
+            foreach ($accessControls as $config) {
                 $priority = 0;
                 $serial = 0;
 
-                if (is_array($config))
-                {
+                if (is_array($config)) {
                     $accessControl = $config['access_control'];
 
-                    if (isset($config['priority']))
-                    {
+                    if (isset($config['priority'])) {
                         $priority = $config['priority'];
                     }
 
-                    if (isset($config['serial'])) 
-                    {
+                    if (isset($config['serial'])) {
                         $serial = $config['serial'];
                     }
-                }
-                else
-                {
+                } else {
                     $accessControl = $config;
                 }
 
                 $this->accessControls[] = [
                     'access_control' => $accessControl,
                     'priority' => $priority,
-                    'serial' => ($this->_serial++) + $serial
+                    'serial' => ($this->_serial++) + $serial,
                 ];
             }
         }

@@ -14,6 +14,6 @@ class AccessControl extends AccessControlAbstract
      */
     protected $options = [
         'assert' => null,
-        'domains' => []
+        'domains' => [],
     ];
 }

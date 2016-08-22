@@ -16,6 +16,6 @@ class AccessControl extends AccessControlAbstract
         'roles' => [],
         'permissions' => [],
         'assert' => null,
-        'domains' => []
+        'domains' => [],
     ];
 }

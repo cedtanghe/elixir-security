@@ -5,7 +5,7 @@ namespace Elixir\Security;
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-class Crypt 
+class Crypt
 {
     /**
      * @var string
@@ -23,7 +23,7 @@ class Crypt
     protected $mode;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $ivSize;
 
@@ -31,19 +31,19 @@ class Crypt
      * @param string $secret
      * @param string $cipher
      * @param string $mode
+     *
      * @throws \RuntimeException
      */
-    public function __construct($secret, $cipher = MCRYPT_RIJNDAEL_128, $mode = MCRYPT_MODE_CBC) 
+    public function __construct($secret, $cipher = MCRYPT_RIJNDAEL_128, $mode = MCRYPT_MODE_CBC)
     {
-        if (!extension_loaded('mcrypt')) 
-        {
+        if (!extension_loaded('mcrypt')) {
             throw new \RuntimeException('Mcrypt is not available.');
         }
-        
+
         $this->cipher = $cipher;
         $this->mode = $mode;
         $this->ivSize = mcrypt_get_iv_size($this->cipher, $this->mode);
-        
+
         $maxSize = mcrypt_get_key_size($this->cipher, $this->mode);
         $this->secret = strlen($secret) > $maxSize ? substr($secret, 0, $maxSize) : $secret;
     }
@@ -51,7 +51,7 @@ class Crypt
     /**
      * @return string
      */
-    public function getCipher() 
+    public function getCipher()
     {
         return $this->cipher;
     }
@@ -67,32 +67,34 @@ class Crypt
     /**
      * @return string
      */
-    public function getMode() 
+    public function getMode()
     {
         return $this->mode;
     }
 
     /**
      * @param string $str
+     *
      * @return string
      */
-    public function encrypt($str) 
+    public function encrypt($str)
     {
         $iv = mcrypt_create_iv($this->ivSize, MCRYPT_RAND);
 
         $encripted = mcrypt_encrypt(
             $this->cipher,
-            $this->secret, 
-            $str, 
-            $this->mode, 
+            $this->secret,
+            $str,
+            $this->mode,
             $iv
         );
 
-        return base64_encode($iv . $encripted);
+        return base64_encode($iv.$encripted);
     }
 
     /**
      * @param string $str
+     *
      * @return string
      */
     public function decrypt($str)
@@ -101,12 +103,12 @@ class Crypt
 
         return rtrim(
             mcrypt_decrypt(
-                $this->cipher, 
-                $this->secret, 
-                substr($decode, $this->ivSize), 
-                $this->mode, 
+                $this->cipher,
+                $this->secret,
+                substr($decode, $this->ivSize),
+                $this->mode,
                 substr($decode, 0, $this->ivSize)
-            ), 
+            ),
             "\0"
         );
     }

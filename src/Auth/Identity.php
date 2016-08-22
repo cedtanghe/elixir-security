@@ -4,7 +4,6 @@ namespace Elixir\Security\Auth;
 
 use Elixir\Dispatcher\DispatcherInterface;
 use Elixir\Dispatcher\DispatcherTrait;
-use Elixir\Security\Auth\AuthEvent;
 
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
@@ -17,22 +16,22 @@ class Identity implements DispatcherInterface, \ArrayAccess
      * @var mixed
      */
     protected $securityContext;
-    
+
     /**
      * @var array|\ArrayAccess
      */
     protected $data;
 
     /**
-     * @var string 
+     * @var string
      */
     protected $domain;
 
     /**
      * @param array|\ArrayAccess $data
-     * @param mixed $securityContext
+     * @param mixed              $securityContext
      */
-    public function __construct($data = [], $securityContext = null) 
+    public function __construct($data = [], $securityContext = null)
     {
         $this->data = $data;
         $this->securityContext = $securityContext;
@@ -41,7 +40,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @param mixed $context
      */
-    public function setSecurityContext($context) 
+    public function setSecurityContext($context)
     {
         $this->securityContext = $context;
     }
@@ -65,22 +64,24 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @return array|\ArrayAccess
      */
-    public function getData() 
+    public function getData()
     {
         return $this->data;
     }
 
     /**
      * @internal
+     *
      * @param string $domain
      */
-    public function setDomain($domain) 
+    public function setDomain($domain)
     {
         $this->domain = $domain;
     }
 
     /**
      * @internal
+     *
      * @return string
      */
     public function getDomain()
@@ -88,10 +89,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
         return $this->domain;
     }
 
-    /**
-     * @return void
-     */
-    public function update() 
+    public function update()
     {
         $this->dispatch(new AuthEvent(AuthEvent::IDENTITY_UPDATED));
     }
@@ -99,11 +97,11 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @internal
      */
-    public function remove() 
+    public function remove()
     {
         $this->dispatch(new AuthEvent(AuthEvent::IDENTITY_REMOVED));
     }
-    
+
     /**
      * @ignore
      */
@@ -115,7 +113,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @ignore
      */
-    public function offsetSet($key, $value) 
+    public function offsetSet($key, $value)
     {
         $this->data[$key] = $value;
     }
@@ -123,7 +121,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @ignore
      */
-    public function offsetGet($key) 
+    public function offsetGet($key)
     {
         return isset($this->data[$key]) ? $this->data[$key] : null;
     }
@@ -147,7 +145,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @ignore
      */
-    public function __get($key) 
+    public function __get($key)
     {
         return $this->offsetGet($key);
     }
@@ -155,7 +153,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @ignore
      */
-    public function __set($key, $value) 
+    public function __set($key, $value)
     {
         $this->offsetSet($key, $value);
     }
@@ -163,11 +161,11 @@ class Identity implements DispatcherInterface, \ArrayAccess
     /**
      * @ignore
      */
-    public function __unset($key) 
+    public function __unset($key)
     {
         $this->offsetUnset($key);
     }
-    
+
     /**
      * @ignore
      */
@@ -176,7 +174,7 @@ class Identity implements DispatcherInterface, \ArrayAccess
         return [
             'data' => $this->data,
             'domain' => $this->domain,
-            'security_context' => $this->securityContext ? get_class($this->securityContext) : null
+            'security_context' => $this->securityContext ? get_class($this->securityContext) : null,
         ];
     }
 }

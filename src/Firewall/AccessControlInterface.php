@@ -5,23 +5,23 @@ namespace Elixir\Security\Firewall;
 /**
  * @author Cédric Tanghe <ced.tanghe@gmail.com>
  */
-interface AccessControlInterface 
+interface AccessControlInterface
 {
     /**
      * @var string
      */
     const GLOBAL_CONFIG = 'global';
-    
+
     /**
      * @var string
      */
     const OPTIONS = 'options';
-    
+
     /**
      * @var string
      */
     const PRIORITY = 'priority';
-    
+
     /**
      * @return string
      */
